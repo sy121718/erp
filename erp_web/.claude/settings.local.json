@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "mcp__filesystem__list_directory",
+      "mcp__zai-mcp-server__ui_to_artifact",
+      "mcp__filesystem__read_media_file",
+      "mcp__zai-mcp-server__analyze_image",
+      "mcp__filesystem__read_multiple_files",
+      "Bash(curl:*)"
+    ]
+  }
+}

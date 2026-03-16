@@ -1,0 +1,59 @@
+---
+description: ERP 项目开发规范 - 自动加载项目规则文件
+alwaysApply: true
+---
+
+# ERP 项目规则
+
+本项目包含前端和后端两部分，每次开发时请先阅读对应的 CLAUDE.md 文件了解完整规范。
+
+## 前端规则
+
+**规则文件**: `erp_web/CLAUDE.md`
+
+## 后端规则
+
+### 分层规则文件
+
+| 层 | 规则文件 | 职责 |
+|---|---------|------|
+| 主规则 | `erp_server/CLAUDE.md` | 核心规则、目录结构、开发流程 |
+| Domain | `erp_server/internal/domain/CLAUDE.md` | 领域层：实体、值对象、仓储接口 |
+| Application | `erp_server/internal/application/CLAUDE.md` | 应用层：业务流程、事务管理 |
+| Infrastructure | `erp_server/internal/infrastructure/CLAUDE.md` | 基础设施层：Repository 实现、PO 转换 |
+| Handler | `erp_server/internal/handler/CLAUDE.md` | 接口层：HTTP 处理、DTO 定义和转换 |
+| pkg | `erp_server/pkg/CLAUDE.md` | 公共库：config、database、errors、log、utils、validator |
+
+### 开发流程
+
+1. 先阅读对应层的 CLAUDE.md 文件
+2. 按规范编写代码
+3. 编写单元测试和集成测试
+
+### DDD 分层架构
+
+```
+前端数据
+    ↓
+Handler 层：Request DTO → Entity → Response DTO
+    ↓
+Application 层：Entity（业务逻辑）
+    ↓
+Infrastructure 层：Entity → PO → 数据库
+```
+
+### 目录结构
+
+```
+erp_server/
+├── CLAUDE.md                          # 主规则
+├── cmd/api/main.go                    # 入口
+├── configs/                           # 配置
+├── internal/
+│   ├── domain/CLAUDE.md              # 领域层
+│   ├── application/CLAUDE.md         # 应用层
+│   ├── infrastructure/CLAUDE.md      # 基础设施层
+│   └── handler/CLAUDE.md             # 接口层
+├── pkg/CLAUDE.md                     # 公共库
+└── test/                             # 测试
+```

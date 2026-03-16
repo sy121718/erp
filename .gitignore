@@ -1,0 +1,42 @@
+# Node
+node_modules/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+pkg/mod/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+erp_server/erp_server
+erp_web/dist/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

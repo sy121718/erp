@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__web-search-prime__web_search_prime",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__directory_tree",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

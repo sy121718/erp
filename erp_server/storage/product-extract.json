@@ -1,0 +1,59 @@
+{
+  "source_product_id": "3465427856",
+  "title": "打火机套装",
+  "description": "Technical specifications: Material: Alloy, Size: 34.5*11.7 mm, Colors: Black, Dark Gray, Gray, Silver",
+  "brand": "",
+  "rating": "5.0",
+  "review_count": "4",
+  "main_image": "https://ir.ozone.ru/s3/multimedia-1-z/8565169679.jpg",
+  "price": "145",
+  "currency": "RUB",
+  "stock_status": "InStock",
+  "source_url": "https://www.ozon.ru/product/nabor-dlya-zazhigalki-3465427856/",
+  
+  "category": {
+    "breadcrumbs": [
+      {"url": "elektronnye-sigarety...", "name": "电子烟和吸烟用品"},
+      {"url": "tovary-dlya-kureniya...", "name": "吸烟用品"},
+      {"url": "zazhigalki-i-aksessuary...", "name": "打火机和配件"},
+      {"url": "kremni-dlya-zazhigalok...", "name": "打火机火石"}
+    ]
+  },
+  
+  "skus": [
+    {
+      "sku_id": "3465427856",
+      "price": "142",
+      "stock_status": 1,
+      "attributes": {"color": "灰色"},
+      "image_url": "https://ir.ozone.ru/s3/multimedia-1-z/wc140/8565169679.jpg"
+    },
+    {
+      "sku_id": "3465420520",
+      "price": "134",
+      "stock_status": 1,
+      "attributes": {"color": "深灰"},
+      "image_url": "https://ir.ozone.ru/s3/multimedia-1-q/wc140/8565170210.jpg"
+    },
+    {
+      "sku_id": "3465425546",
+      "price": "139",
+      "stock_status": 1,
+      "attributes": {"color": "黑色"},
+      "image_url": "https://ir.ozone.ru/s3/multimedia-1-0/wc140/8565170148.jpg"
+    }
+  ],
+  
+  "images": [
+    "https://ir.ozone.ru/s3/multimedia-1-z/8565169679.jpg",
+    "https://ir.ozone.ru/s3/multimedia-1-z/wc140/8565169679.jpg",
+    "https://ir.ozone.ru/s3/multimedia-1-q/wc140/8565170210.jpg",
+    "https://ir.ozone.ru/s3/multimedia-1-0/wc140/8565170148.jpg"
+  ],
+  
+  "properties": [
+    {"name": "材料", "value": "合金"},
+    {"name": "尺寸", "value": "34.5*11.7 mm"},
+    {"name": "颜色", "value": "黑色, 深灰, 灰色, 银色"}
+  ]
+}

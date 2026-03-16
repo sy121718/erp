@@ -1,0 +1,10 @@
+{
+  "enabledPlugins": {
+    "vtsls@claude-code-lsps": false,
+    "pyright-lsp@claude-plugins-official": false,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "pyright@claude-code-lsps": true,
+    "intelephense@claude-code-lsps": true,
+    "gopls@claude-code-lsps": true
+  }
+}

@@ -1,0 +1,292 @@
+/* ===========================================
+   ERP 全局主题样式
+   适配 Layui Vue 组件库
+   =========================================== */
+
+/* CSS 变量定义 */
+:root {
+  /* 主色调 (Primary) */
+  --erp-primary: #03b3b2;
+  --erp-primary-hover: #029a99;
+  --erp-primary-light: rgba(3, 179, 178, 0.1);
+  --erp-primary-active: #028281;
+
+  /* 强调色 (Accent) */
+  --erp-orange: #f97316;
+  --erp-orange-hover: #ea580c;
+  --erp-purple: #9333ea;
+  --erp-red: #ef4444;
+  --erp-green: #22c55e;
+  --erp-blue: #3b82f6;
+
+  /* 中性色 (Neutral) */
+  --erp-bg-base: #f3f4f6;
+  --erp-bg-card: #ffffff;
+  --erp-border-color: #e5e7eb;
+  --erp-divider: #f3f4f6;
+
+  /* 文字颜色 */
+  --erp-text-primary: #111827;
+  --erp-text-secondary: #4b5563;
+  --erp-text-tertiary: #6b7280;
+  --erp-text-disabled: #9ca3af;
+
+  /* 圆角 */
+  --erp-radius-sm: 4px;
+  --erp-radius-base: 6px;
+  --erp-radius-lg: 8px;
+
+  /* 阴影 */
+  --erp-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --erp-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --erp-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* 全局重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  color: var(--erp-text-primary);
+  background-color: var(--erp-bg-base);
+}
+
+/* ===========================================
+   Layui Vue 主题覆盖
+   =========================================== */
+
+/* 按钮主色调 */
+.lay-btn-primary {
+  background-color: var(--erp-primary) !important;
+  border-color: var(--erp-primary) !important;
+}
+
+.lay-btn-primary:hover {
+  background-color: var(--erp-primary-hover) !important;
+  border-color: var(--erp-primary-hover) !important;
+}
+
+.lay-btn-primary:active {
+  background-color: var(--erp-primary-active) !important;
+  border-color: var(--erp-primary-active) !important;
+}
+
+/* 按钮 - 橙色强调 */
+.lay-btn-warning {
+  background-color: var(--erp-orange) !important;
+  border-color: var(--erp-orange) !important;
+}
+
+.lay-btn-warning:hover {
+  background-color: var(--erp-orange-hover) !important;
+  border-color: var(--erp-orange-hover) !important;
+}
+
+/* 按钮 - 成功 */
+.lay-btn-success {
+  background-color: var(--erp-green) !important;
+  border-color: var(--erp-green) !important;
+}
+
+/* 按钮 - 危险 */
+.lay-btn-danger {
+  background-color: var(--erp-red) !important;
+  border-color: var(--erp-red) !important;
+}
+
+/* 链接颜色 */
+.lay-link {
+  color: var(--erp-primary) !important;
+}
+
+.lay-link:hover {
+  color: var(--erp-primary-hover) !important;
+}
+
+/* 菜单激活状态 */
+.lay-menu-item.is-active {
+  color: var(--erp-primary) !important;
+  background-color: var(--erp-primary-light) !important;
+}
+
+.lay-menu-item:hover {
+  color: var(--erp-primary) !important;
+  background-color: var(--erp-primary-light) !important;
+}
+
+/* 子菜单标题悬停 */
+.lay-sub-menu-title:hover {
+  color: var(--erp-primary) !important;
+  background-color: var(--erp-primary-light) !important;
+}
+
+/* 标签页激活 */
+.lay-tab-title .layui-this {
+  color: var(--erp-primary) !important;
+  border-bottom-color: var(--erp-primary) !important;
+}
+
+/* 复选框/单选框 */
+.lay-checkbox input:checked + span {
+  color: var(--erp-primary) !important;
+}
+
+.lay-checkbox input:checked + span .layui-icon-ok {
+  background-color: var(--erp-primary) !important;
+  border-color: var(--erp-primary) !important;
+}
+
+/* 开关 */
+.lay-switch .layui-switch-on {
+  background-color: var(--erp-primary) !important;
+}
+
+/* 输入框聚焦 */
+.lay-input:focus,
+.lay-textarea:focus,
+.lay-select:focus {
+  border-color: var(--erp-primary) !important;
+  box-shadow: 0 0 0 2px var(--erp-primary-light) !important;
+}
+
+/* 分页激活 */
+.lay-page .layui-this {
+  background-color: var(--erp-primary) !important;
+  border-color: var(--erp-primary) !important;
+}
+
+/* 进度条 */
+.lay-progress-bar {
+  background-color: var(--erp-primary) !important;
+}
+
+/* 标签 Tag */
+.lay-tag-primary {
+  background-color: var(--erp-primary-light) !important;
+  color: var(--erp-primary) !important;
+  border-color: var(--erp-primary) !important;
+}
+
+.lay-tag-success {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+  color: var(--erp-green) !important;
+  border-color: var(--erp-green) !important;
+}
+
+.lay-tag-danger {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: var(--erp-red) !important;
+  border-color: var(--erp-red) !important;
+}
+
+.lay-tag-warning {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+  color: var(--erp-orange) !important;
+  border-color: var(--erp-orange) !important;
+}
+
+/* 面包屑 */
+.lay-breadcrumb a:hover {
+  color: var(--erp-primary) !important;
+}
+
+/* 表格 */
+.lay-table tbody tr:hover {
+  background-color: var(--erp-primary-light) !important;
+}
+
+/* 卡片 */
+.lay-card {
+  border-radius: var(--erp-radius-lg) !important;
+  box-shadow: var(--erp-shadow-sm) !important;
+  border: none !important;
+}
+
+/* 弹窗 */
+.lay-layer .layui-layer-title {
+  background-color: var(--erp-primary) !important;
+  color: #fff !important;
+}
+
+.lay-layer .layui-layer-btn .layui-layer-btn0 {
+  background-color: var(--erp-primary) !important;
+  border-color: var(--erp-primary) !important;
+}
+
+/* 下拉菜单 */
+.lay-dropdown-menu-item:hover {
+  background-color: var(--erp-primary-light) !important;
+  color: var(--erp-primary) !important;
+}
+
+/* ===========================================
+   全局工具类
+   =========================================== */
+
+/* 文字颜色 */
+.text-primary { color: var(--erp-primary) !important; }
+.text-orange { color: var(--erp-orange) !important; }
+.text-purple { color: var(--erp-purple) !important; }
+.text-red { color: var(--erp-red) !important; }
+.text-green { color: var(--erp-green) !important; }
+.text-blue { color: var(--erp-blue) !important; }
+.text-secondary { color: var(--erp-text-secondary) !important; }
+.text-tertiary { color: var(--erp-text-tertiary) !important; }
+.text-disabled { color: var(--erp-text-disabled) !important; }
+
+/* 背景颜色 */
+.bg-primary { background-color: var(--erp-primary) !important; }
+.bg-primary-light { background-color: var(--erp-primary-light) !important; }
+.bg-orange { background-color: var(--erp-orange) !important; }
+.bg-green { background-color: var(--erp-green) !important; }
+.bg-red { background-color: var(--erp-red) !important; }
+.bg-blue { background-color: var(--erp-blue) !important; }
+.bg-base { background-color: var(--erp-bg-base) !important; }
+.bg-card { background-color: var(--erp-bg-card) !important; }
+
+/* 边框 */
+.border { border: 1px solid var(--erp-border-color) !important; }
+.border-primary { border-color: var(--erp-primary) !important; }
+
+/* 圆角 */
+.rounded-sm { border-radius: var(--erp-radius-sm) !important; }
+.rounded { border-radius: var(--erp-radius-base) !important; }
+.rounded-lg { border-radius: var(--erp-radius-lg) !important; }
+
+/* 阴影 */
+.shadow-sm { box-shadow: var(--erp-shadow-sm) !important; }
+.shadow { box-shadow: var(--erp-shadow-base) !important; }
+.shadow-lg { box-shadow: var(--erp-shadow-lg) !important; }
+
+/* 内边距 */
+.p-4 { padding: 16px !important; }
+.p-3 { padding: 12px !important; }
+.p-2 { padding: 8px !important; }
+
+/* 外边距 */
+.m-4 { margin: 16px !important; }
+.m-3 { margin: 12px !important; }
+.m-2 { margin: 8px !important; }
+.mb-4 { margin-bottom: 16px !important; }
+.mb-3 { margin-bottom: 12px !important; }
+.mt-4 { margin-top: 16px !important; }
+.mt-3 { margin-top: 12px !important; }
+
+/* Flex 布局 */
+.flex { display: flex !important; }
+.items-center { align-items: center !important; }
+.justify-between { justify-content: space-between !important; }
+.justify-center { justify-content: center !important; }
+.gap-2 { gap: 8px !important; }
+.gap-3 { gap: 12px !important; }
+.gap-4 { gap: 16px !important; }
+
+/* 间距 */
+.w-full { width: 100% !important; }
+.h-full { height: 100% !important; }

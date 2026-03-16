@@ -1,0 +1,221 @@
+package jwt
+
+import (
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
+	"time"
+
+	"erp-server/pkg/config"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+var (
+	ErrTokenExpired     = errors.New("token已过期")
+	ErrTokenInvalid     = errors.New("token无效")
+	ErrTokenMalformed   = errors.New("token格式错误")
+	ErrTokenNotValidYet = errors.New("token尚未生效")
+)
+
+// Claims 自定义Claims (access_token使用)
+type Claims struct {
+	UserID   int64  `json:"user_id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	IsAdmin  bool   `json:"is_admin"`
+	TokenID  string `json:"jti"` // Token唯一标识，用于Redis存储
+	jwt.RegisteredClaims
+}
+
+// RefreshClaims 刷新token的Claims (refresh_token使用)
+type RefreshClaims struct {
+	UserID   int64  `json:"user_id"`
+	Username string `json:"username"`
+	IsAdmin  bool   `json:"is_admin"`
+	TokenID  string `json:"jti"` // Token唯一标识，用于Redis存储
+	jwt.RegisteredClaims
+}
+
+// JWT JWT工具
+type JWT struct {
+	config *config.JWTConfig
+}
+
+var jwtInstance *JWT
+
+// Init 初始化JWT
+func Init(cfg *config.JWTConfig) {
+	jwtInstance = &JWT{config: cfg}
+}
+
+// Get 获取JWT实例
+func Get() *JWT {
+	if jwtInstance == nil {
+		jwtInstance = &JWT{
+			config: config.DefaultJWTConfig(),
+		}
+	}
+	return jwtInstance
+}
+
+// generateTokenID 生成唯一的Token ID
+func generateTokenID() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return base64.URLEncoding.EncodeToString(b)
+}
+
+// GenerateAccessToken 生成access_token (短期，5分钟)
+func (j *JWT) GenerateAccessToken(userID int64, username, name string, isAdmin bool) (tokenString, tokenID string, err error) {
+	tokenID = generateTokenID()
+	now := time.Now()
+	claims := Claims{
+		UserID:   userID,
+		Username: username,
+		Name:     name,
+		IsAdmin:  isAdmin,
+		TokenID:  tokenID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        tokenID,
+			ExpiresAt: jwt.NewNumericDate(now.Add(j.config.GetAccessTokenDuration())),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			Issuer:    j.config.GetIssuer(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err = token.SignedString([]byte(j.config.GetSecret()))
+	return
+}
+
+// GenerateRefreshToken 生成refresh_token (长期，7天)
+func (j *JWT) GenerateRefreshToken(userID int64, username string, isAdmin bool) (tokenString, tokenID string, err error) {
+	tokenID = generateTokenID()
+	now := time.Now()
+	claims := RefreshClaims{
+		UserID:   userID,
+		Username: username,
+		IsAdmin:  isAdmin,
+		TokenID:  tokenID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        tokenID,
+			ExpiresAt: jwt.NewNumericDate(now.Add(j.config.GetRefreshTokenDuration())),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			Issuer:    j.config.GetIssuer(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err = token.SignedString([]byte(j.config.GetSecret()))
+	return
+}
+
+// GenerateToken 生成token (兼容旧接口)
+func (j *JWT) GenerateToken(userID int64, username, name string, isAdmin bool) (string, error) {
+	tokenString, _, err := j.GenerateAccessToken(userID, username, name, isAdmin)
+	return tokenString, err
+}
+
+// ParseToken 解析access_token
+func (j *JWT) ParseToken(tokenString string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(j.config.GetSecret()), nil
+	})
+
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, ErrTokenExpired
+		}
+		if errors.Is(err, jwt.ErrTokenMalformed) {
+			return nil, ErrTokenMalformed
+		}
+		if errors.Is(err, jwt.ErrTokenNotValidYet) {
+			return nil, ErrTokenNotValidYet
+		}
+		return nil, ErrTokenInvalid
+	}
+
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, ErrTokenInvalid
+}
+
+// ParseRefreshToken 解析refresh_token
+func (j *JWT) ParseRefreshToken(tokenString string) (*RefreshClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(j.config.GetSecret()), nil
+	})
+
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, ErrTokenExpired
+		}
+		if errors.Is(err, jwt.ErrTokenMalformed) {
+			return nil, ErrTokenMalformed
+		}
+		if errors.Is(err, jwt.ErrTokenNotValidYet) {
+			return nil, ErrTokenNotValidYet
+		}
+		return nil, ErrTokenInvalid
+	}
+
+	if claims, ok := token.Claims.(*RefreshClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, ErrTokenInvalid
+}
+
+// GetTokenIDFromAccessToken 从access_token获取token_id
+func (j *JWT) GetTokenIDFromAccessToken(tokenString string) (string, error) {
+	claims, err := j.ParseToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+	return claims.TokenID, nil
+}
+
+// GetTokenIDFromRefreshToken 从refresh_token获取token_id
+func (j *JWT) GetTokenIDFromRefreshToken(tokenString string) (string, error) {
+	claims, err := j.ParseRefreshToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+	return claims.TokenID, nil
+}
+
+// RefreshToken 使用refresh_token刷新，返回新的access_token和refresh_token
+func (j *JWT) RefreshToken(refreshTokenString string) (accessToken, newRefreshToken string, err error) {
+	claims, err := j.ParseRefreshToken(refreshTokenString)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 生成新的access_token
+	accessToken, _, err = j.GenerateAccessToken(claims.UserID, claims.Username, "", claims.IsAdmin)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 生成新的refresh_token
+	newRefreshToken, _, err = j.GenerateRefreshToken(claims.UserID, claims.Username, claims.IsAdmin)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, newRefreshToken, nil
+}
+
+// GenerateRandomSecret 生成随机密钥
+func GenerateRandomSecret(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}

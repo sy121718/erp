@@ -1,0 +1,42 @@
+server:
+  port: 8081
+  mode: debug
+
+database:
+  driver: mysql
+  host: 127.0.0.1
+  port: 3306
+  username: root
+  password: GKXTGztEWwkWtrWA
+  dbname: erp
+
+# Redis配置
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+log:
+  level: debug
+  format: console
+
+# JWT配置
+jwt:
+  secret: "erp-jwt-secret-key-2024-secure"    # JWT签名密钥
+  access_token_time: 5                         # access_token过期时间(分钟)
+  refresh_token_time: 7                        # refresh_token过期时间(天)
+  issuer: "erp-server"                         # 签发者
+
+# 验证码配置
+captcha:
+  length: 6           # 验证码长度
+  expire_time: 300    # 过期时间(秒)
+  width: 120          # 图片宽度
+  height: 40          # 图片高度
+
+# 签名配置
+sign:
+  secret: "erp-sign-secret-key-2024-secure"  # 签名密钥
+  expire_time: 300                            # 签名有效期(秒)
