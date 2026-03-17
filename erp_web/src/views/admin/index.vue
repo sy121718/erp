@@ -70,30 +70,20 @@ const {
         @change="handlePageChange"
         @limitChange="handleSizeChange"
       >
-        <!-- 状态 -->
+        <!-- 状态（可点击切换） -->
         <template #status="{ row }">
-          <lay-tag :type="row.status === 1 ? 'normal' : 'danger'">
+          <lay-tag
+            :type="row.status === 1 ? 'normal' : 'danger'"
+            style="cursor: pointer"
+            @click="handleToggleStatus(row)"
+          >
             {{ row.status === 1 ? '正常' : '禁用' }}
-          </lay-tag>
-        </template>
-
-        <!-- 是否超管 -->
-        <template #is_admin="{ row }">
-          <lay-tag :type="row.is_admin ? 'normal' : ''">
-            {{ row.is_admin ? '是' : '否' }}
           </lay-tag>
         </template>
 
         <!-- 操作 -->
         <template #action="{ row }">
           <lay-button size="xs" type="primary" @click="handleEdit(row)">编辑</lay-button>
-          <lay-button
-            size="xs"
-            :type="row.status === 1 ? 'danger' : 'success'"
-            @click="handleToggleStatus(row)"
-          >
-            {{ row.status === 1 ? '禁用' : '解禁' }}
-          </lay-button>
           <lay-button size="xs" type="warm" @click="handleResetPassword(row)">重置密码</lay-button>
           <lay-button size="xs" type="danger" @click="handleForceLogout(row)">强制下线</lay-button>
           <lay-button size="xs" type="danger" @click="handleDelete(row)">删除</lay-button>
@@ -159,10 +149,6 @@ const {
           <lay-tag :type="formData.status === 1 ? 'normal' : 'danger'">
             {{ formData.status === 1 ? '正常' : '禁用' }}
           </lay-tag>
-        </lay-form-item>
-
-        <lay-form-item v-if="formMode === 'edit'" label="创建时间">
-          <lay-input :model-value="formData.create_time" disabled />
         </lay-form-item>
       </lay-form>
     </lay-layer>

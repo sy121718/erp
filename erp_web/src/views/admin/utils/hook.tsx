@@ -32,8 +32,7 @@ export const useAdminList = () => {
     name: '',
     email: '',
     phone: '',
-    status: undefined,
-    create_time: undefined
+    status: undefined
   })
 
   // 表格列配置
@@ -44,11 +43,8 @@ export const useAdminList = () => {
     { title: '邮箱', key: 'email', width: 180 },
     { title: '手机号', key: 'phone', width: 140 },
     { title: '状态', key: 'status', width: 100, customSlot: 'status' },
-    { title: '超级管理员', key: 'is_admin', width: 120, customSlot: 'is_admin' },
-    { title: '登录失败次数', key: 'login_failure_count', width: 120 },
     { title: '最后登录时间', key: 'last_login_time', width: 180 },
-    { title: '创建时间', key: 'create_time', width: 180 },
-    { title: '操作', key: 'action', width: 280, fixed: 'right', customSlot: 'action' }
+    { title: '操作', key: 'action', width: 240, fixed: 'right', customSlot: 'action' }
   ]
 
   // 获取列表数据
@@ -105,8 +101,7 @@ export const useAdminList = () => {
       name: '',
       email: '',
       phone: '',
-      status: undefined,
-      create_time: undefined
+      status: undefined
     })
     formVisible.value = true
   }
@@ -125,8 +120,7 @@ export const useAdminList = () => {
         name: detail.name,
         email: detail.email || '',
         phone: detail.phone || '',
-        status: detail.status,
-        create_time: detail.create_time
+        status: detail.status
       })
     } catch (error) {
       formVisible.value = false

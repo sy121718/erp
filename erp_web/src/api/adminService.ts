@@ -12,7 +12,6 @@ export interface AdminInfo {
   phone?: string
   status: number // 0=禁用 1=正常
   is_admin: boolean
-  login_failure_count: number
   last_login_time?: string
   create_time: string
 }

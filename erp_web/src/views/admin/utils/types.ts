@@ -28,7 +28,6 @@ export interface AdminFormData {
   email: string
   phone: string
   status?: number
-  create_time?: string
 }
 
 /** 表单模式 */

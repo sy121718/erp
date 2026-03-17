@@ -57,17 +57,16 @@ type ListAdminRequest struct {
 
 // AdminResponse 管理员响应
 type AdminResponse struct {
-	ID                int64  `json:"id"`
-	Username          string `json:"username"`
-	Name              string `json:"name"`
-	Avatar            string `json:"avatar"`
-	Email             string `json:"email"`
-	Phone             string `json:"phone"`
-	Status            int    `json:"status"`
-	IsAdmin           bool   `json:"is_admin"`
-	LoginFailureCount int    `json:"login_failure_count"`
-	LastLoginTime     string `json:"last_login_time,omitempty"`
-	CreateTime        string `json:"create_time"`
+	ID            int64  `json:"id"`
+	Username      string `json:"username"`
+	Name          string `json:"name"`
+	Avatar        string `json:"avatar"`
+	Email         string `json:"email"`
+	Phone         string `json:"phone"`
+	Status        int    `json:"status"`
+	IsAdmin       bool   `json:"is_admin"`
+	LastLoginTime string `json:"last_login_time,omitempty"`
+	CreateTime    string `json:"create_time"`
 }
 
 // LoginResponse 登录响应
@@ -97,16 +96,15 @@ type ListAdminResponse struct {
 // ToResponse Entity转响应DTO
 func ToResponse(entity *admin.Admin) *AdminResponse {
 	resp := &AdminResponse{
-		ID:                entity.ID,
-		Username:          entity.Username,
-		Name:              entity.Name,
-		Avatar:            entity.Avatar,
-		Email:             entity.Email,
-		Phone:             entity.Phone,
-		Status:            int(entity.Status),
-		IsAdmin:           entity.IsAdmin,
-		LoginFailureCount: entity.LoginFailureCount,
-		CreateTime:        entity.CreateTime.Format("2006-01-02 15:04:05"),
+		ID:         entity.ID,
+		Username:   entity.Username,
+		Name:       entity.Name,
+		Avatar:     entity.Avatar,
+		Email:      entity.Email,
+		Phone:      entity.Phone,
+		Status:     int(entity.Status),
+		IsAdmin:    entity.IsAdmin,
+		CreateTime: entity.CreateTime.Format("2006-01-02 15:04:05"),
 	}
 
 	if entity.LastLoginTime != nil {
