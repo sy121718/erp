@@ -20,12 +20,14 @@ func NewHandler(svc *service.UserService) *Handler {
 }
 
 // GetCaptcha 获取验证码
-// GET /api/user/captcha
+// GET /api/user/captcha?type=digit|alphanumeric|math
 func (h *Handler) GetCaptcha(c *gin.Context) {
-	id, code := captcha.Get().Generate()
+	captchaType := captcha.CaptchaType(c.DefaultQuery("type", "digit"))
+	id, display, answer := captcha.Get().GenerateByType(captchaType)
 	utils.Success(c, gin.H{
 		"captcha_id": id,
-		"code":       code,
+		"display":    display,
+		"code":       answer,
 	})
 }
 

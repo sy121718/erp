@@ -31,9 +31,13 @@ export interface RefreshTokenResult {
   expires_in: number
 }
 
+/** 验证码类型 */
+export type CaptchaType = 'digit' | 'alphanumeric' | 'math'
+
 /** 验证码结果 */
 export interface CaptchaResult {
   captcha_id: string
+  display: string
   code: string
 }
 
@@ -101,8 +105,8 @@ export const adminService = {
   /**
    * 获取验证码
    */
-  getCaptcha: (): Promise<CaptchaResult> => {
-    return request.get('/admin/captcha')
+  getCaptcha: (type?: CaptchaType): Promise<CaptchaResult> => {
+    return request.get('/admin/captcha', { params: type ? { type } : undefined })
   },
 
   /**

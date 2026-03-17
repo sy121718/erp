@@ -75,12 +75,14 @@ func (h *Handler) Logout(c *gin.Context) {
 }
 
 // GetCaptcha 获取验证码
-// GET /api/admin/captcha
+// GET /api/admin/captcha?type=digit|alphanumeric|math
 func (h *Handler) GetCaptcha(c *gin.Context) {
-	id, code := captcha.Get().Generate()
-	utils.Success(c, &CaptchaResponse{
-		CaptchaID: id,
-		Code:      code, // 生产环境应删除
+	captchaType := captcha.CaptchaType(c.DefaultQuery("type", "digit"))
+	id, display, answer := captcha.Get().GenerateByType(captchaType)
+	utils.Success(c, gin.H{
+		"captcha_id": id,
+		"display":    display,
+		"code":       answer,
 	})
 }
 

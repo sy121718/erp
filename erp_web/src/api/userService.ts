@@ -27,9 +27,13 @@ export interface UserLoginParams {
   captcha_code: string
 }
 
+/** 验证码类型 */
+export type CaptchaType = 'digit' | 'alphanumeric' | 'math'
+
 /** 验证码结果 */
 export interface UserCaptchaResult {
   captcha_id: string
+  display: string
   code: string
 }
 
@@ -96,8 +100,8 @@ export interface AdminUpdateUserParams {
 // ========== 用户侧 API ==========
 
 export const userService = {
-  getCaptcha: (): Promise<UserCaptchaResult> => {
-    return request.get('/user/captcha')
+  getCaptcha: (type?: CaptchaType): Promise<UserCaptchaResult> => {
+    return request.get('/user/captcha', { params: type ? { type } : undefined })
   },
 
   login: (params: UserLoginParams): Promise<UserLoginResult> => {

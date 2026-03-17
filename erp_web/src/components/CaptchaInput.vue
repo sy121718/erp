@@ -3,6 +3,7 @@ import { ref, watch, onUnmounted } from 'vue'
 
 interface CaptchaResult {
   captcha_id: string
+  display: string
   code: string
 }
 
@@ -103,7 +104,7 @@ const refresh = async () => {
   try {
     const res = await props.fetchApi()
     emit('update:captchaId', res.captcha_id)
-    captchaImage.value = drawCaptcha(res.code)
+    captchaImage.value = drawCaptcha(res.display || res.code)
     startCountdown()
   } catch {
     // 错误由 request.ts 统一处理
