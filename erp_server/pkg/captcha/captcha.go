@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+// CaptchaType 验证码类型
+type CaptchaType string
+
+const (
+	TypeDigit        CaptchaType = "digit"        // 纯数字
+	TypeAlphanumeric CaptchaType = "alphanumeric"  // 字母数字混合
+	TypeMath         CaptchaType = "math"          // 数学运算
+)
+
 // Captcha 验证码信息
 type Captcha struct {
 	Code      string
@@ -32,33 +41,28 @@ func NewMemoryStore() *MemoryStore {
 	store := &MemoryStore{
 		captchas: make(map[string]*Captcha),
 	}
-	// 启动清理goroutine
 	go store.cleanup()
 	return store
 }
 
-// Set 设置验证码
 func (s *MemoryStore) Set(id string, captcha *Captcha) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.captchas[id] = captcha
 }
 
-// Get 获取验证码
 func (s *MemoryStore) Get(id string) *Captcha {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.captchas[id]
 }
 
-// Delete 删除验证码
 func (s *MemoryStore) Delete(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.captchas, id)
 }
 
-// cleanup 定期清理过期验证码
 func (s *MemoryStore) cleanup() {
 	ticker := time.NewTicker(5 * time.Minute)
 	for range ticker.C {
@@ -113,17 +117,29 @@ func Get() *CaptchaService {
 	return captchaService
 }
 
-// Generate 生成验证码
+// GenerateByType 按类型生成验证码
+// 返回 id, display（展示给用户的文本）, answer（正确答案）
+func (s *CaptchaService) GenerateByType(captchaType CaptchaType) (id, display, answer string) {
+	switch captchaType {
+	case TypeAlphanumeric:
+		id, code := s.GenerateAlphanumeric()
+		return id, code, code
+	case TypeMath:
+		return s.GenerateMath()
+	default:
+		id, code := s.Generate()
+		return id, code, code
+	}
+}
+
+// Generate 生成纯数字验证码
 func (s *CaptchaService) Generate() (id string, code string) {
-	// 生成验证码ID
 	idBytes := make([]byte, 16)
 	rand.Read(idBytes)
 	id = fmt.Sprintf("%x", idBytes)
 
-	// 生成数字验证码
-	code = s.generateCode(s.config.Length)
+	code = s.generateDigitCode(s.config.Length)
 
-	// 存储
 	s.store.Set(id, &Captcha{
 		Code:      code,
 		ExpiresAt: time.Now().Add(s.config.ExpireTime),
@@ -138,7 +154,7 @@ func (s *CaptchaService) GenerateWithPrefix(prefix string) (id string, code stri
 	rand.Read(idBytes)
 	id = prefix + "_" + fmt.Sprintf("%x", idBytes)
 
-	code = s.generateCode(s.config.Length)
+	code = s.generateDigitCode(s.config.Length)
 
 	s.store.Set(id, &Captcha{
 		Code:      code,
@@ -146,43 +162,6 @@ func (s *CaptchaService) GenerateWithPrefix(prefix string) (id string, code stri
 	})
 
 	return id, code
-}
-
-// Verify 验证验证码
-func (s *CaptchaService) Verify(id, code string, clear bool) bool {
-	captcha := s.store.Get(id)
-	if captcha == nil {
-		return false
-	}
-
-	// 检查是否过期
-	if captcha.ExpiresAt.Before(time.Now()) {
-		s.store.Delete(id)
-		return false
-	}
-
-	// 验证码匹配
-	if captcha.Code != code {
-		return false
-	}
-
-	// 验证成功后删除
-	if clear {
-		s.store.Delete(id)
-	}
-
-	return true
-}
-
-// generateCode 生成指定长度的数字验证码
-func (s *CaptchaService) generateCode(length int) string {
-	digits := "0123456789"
-	code := make([]byte, length)
-	for i := 0; i < length; i++ {
-		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(digits))))
-		code[i] = digits[n.Int64()]
-	}
-	return string(code)
 }
 
 // GenerateAlphanumeric 生成字母数字混合验证码
@@ -200,9 +179,88 @@ func (s *CaptchaService) GenerateAlphanumeric() (id string, code string) {
 	code = string(codeBytes)
 
 	s.store.Set(id, &Captcha{
-		Code:      string(code),
+		Code:      code,
 		ExpiresAt: time.Now().Add(s.config.ExpireTime),
 	})
 
-	return id, string(code)
+	return id, code
+}
+
+// GenerateMath 生成数学运算验证码
+// 返回 id, expression（表达式，如 "3 + 5 = ?"）, answer（答案，如 "8"）
+func (s *CaptchaService) GenerateMath() (id, expression, answer string) {
+	idBytes := make([]byte, 16)
+	rand.Read(idBytes)
+	id = fmt.Sprintf("%x", idBytes)
+
+	a := randInt(1, 20)
+	b := randInt(1, 20)
+
+	// 随机选择运算符
+	ops := []string{"+", "-", "×"}
+	opIdx := randInt(0, len(ops))
+	op := ops[opIdx]
+
+	var result int
+	switch op {
+	case "+":
+		result = a + b
+	case "-":
+		if a < b {
+			a, b = b, a
+		}
+		result = a - b
+	case "×":
+		a = randInt(1, 10)
+		b = randInt(1, 10)
+		result = a * b
+	}
+
+	expression = fmt.Sprintf("%d %s %d = ?", a, op, b)
+	answer = fmt.Sprintf("%d", result)
+
+	s.store.Set(id, &Captcha{
+		Code:      answer,
+		ExpiresAt: time.Now().Add(s.config.ExpireTime),
+	})
+
+	return id, expression, answer
+}
+
+// Verify 验证验证码
+func (s *CaptchaService) Verify(id, code string, clear bool) bool {
+	captcha := s.store.Get(id)
+	if captcha == nil {
+		return false
+	}
+
+	if captcha.ExpiresAt.Before(time.Now()) {
+		s.store.Delete(id)
+		return false
+	}
+
+	if captcha.Code != code {
+		return false
+	}
+
+	if clear {
+		s.store.Delete(id)
+	}
+
+	return true
+}
+
+func (s *CaptchaService) generateDigitCode(length int) string {
+	digits := "0123456789"
+	code := make([]byte, length)
+	for i := 0; i < length; i++ {
+		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(digits))))
+		code[i] = digits[n.Int64()]
+	}
+	return string(code)
+}
+
+func randInt(min, max int) int {
+	n, _ := rand.Int(rand.Reader, big.NewInt(int64(max-min)))
+	return int(n.Int64()) + min
 }

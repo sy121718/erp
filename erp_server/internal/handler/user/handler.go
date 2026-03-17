@@ -76,7 +76,7 @@ func (h *Handler) Login(c *gin.Context) {
 	utils.Success(c, &LoginResponse{
 		AccessToken:  resp.AccessToken,
 		RefreshToken: resp.RefreshToken,
-		ExpiresIn:    300,
+		ExpiresIn:    1800,
 		User:         ToResponse(resp.User),
 	})
 }
@@ -168,7 +168,7 @@ func (h *Handler) RefreshToken(c *gin.Context) {
 	utils.Success(c, gin.H{
 		"access_token":  resp.AccessToken,
 		"refresh_token": resp.RefreshToken,
-		"expires_in":    300,
+		"expires_in":    1800,
 	})
 }
 

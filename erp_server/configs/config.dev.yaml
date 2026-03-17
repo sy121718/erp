@@ -25,7 +25,7 @@ log:
 # JWT配置
 jwt:
   secret: "erp-jwt-secret-key-2024-secure"    # JWT签名密钥
-  access_token_time: 5                         # access_token过期时间(分钟)
+  access_token_time: 30                        # access_token过期时间(分钟)
   refresh_token_time: 7                        # refresh_token过期时间(天)
   issuer: "erp-server"                         # 签发者
 

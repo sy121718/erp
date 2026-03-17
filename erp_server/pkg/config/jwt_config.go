@@ -13,7 +13,7 @@ type JWTConfig struct {
 // GetAccessTokenDuration 获取access_token过期时间
 func (c *JWTConfig) GetAccessTokenDuration() time.Duration {
 	if c.AccessTokenTime <= 0 {
-		return 5 * time.Minute // 默认5分钟
+		return 30 * time.Minute // 默认30分钟
 	}
 	return time.Duration(c.AccessTokenTime) * time.Minute
 }
@@ -46,7 +46,7 @@ func (c *JWTConfig) GetIssuer() string {
 func DefaultJWTConfig() *JWTConfig {
 	return &JWTConfig{
 		Secret:           "erp-default-jwt-secret-key-2024",
-		AccessTokenTime:  5,  // 5分钟
+		AccessTokenTime:  30, // 30分钟
 		RefreshTokenTime: 7,  // 7天
 		Issuer:           "erp-server",
 	}
