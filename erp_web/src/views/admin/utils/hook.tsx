@@ -214,19 +214,20 @@ export const useAdminList = () => {
       title: '重置密码',
       formType: 1,
       value: '',
-      placeholder: '请输入新密码（6-50位）'
-    }, async (value: string) => {
-      if (value.length < 6 || value.length > 50) {
-        layer.msg('密码长度为6-50位', { icon: 0 })
-        return false
-      }
-      try {
-        await adminService.resetPassword(row.id, { new_password: value })
-        layer.msg('重置密码成功', { icon: 1 })
-        return true
-      } catch (error) {
-        // 错误由 request.ts 统一处理
-        return false
+      placeholder: '请输入新密码（6-50位）',
+      yes: async (value: string) => {
+        if (value.length < 6 || value.length > 50) {
+          layer.msg('密码长度为6-50位', { icon: 0 })
+          return false
+        }
+        try {
+          await adminService.resetPassword(row.id, { new_password: value })
+          layer.msg('重置密码成功', { icon: 1 })
+          return true
+        } catch (error) {
+          // 错误由 request.ts 统一处理
+          return false
+        }
       }
     })
   }
