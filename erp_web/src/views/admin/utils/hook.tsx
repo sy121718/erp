@@ -187,7 +187,7 @@ export const useAdminList = () => {
             // 错误由 request.ts 统一处理
           }
         }},
-        { text: '取消' }
+        { text: '取消', callback: () => true }
       ]
     })
   }
@@ -244,7 +244,7 @@ export const useAdminList = () => {
             // 错误由 request.ts 统一处理
           }
         }},
-        { text: '取消' }
+        { text: '取消', callback: () => true }
       ]
     })
   }
