@@ -17,6 +17,7 @@ const WHITE_LIST = [
   '/api/admin/login',
   '/api/admin/captcha',
   '/api/admin/refresh-token',
+  '/api/user/captcha',
   '/api/user/login',
   '/api/user/register',
   '/api/user/refresh-token'

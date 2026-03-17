@@ -25,6 +25,7 @@ var whiteList = []string{
 	"/api/admin/captcha",
 	"/api/admin/refresh-token",
 	"/api/admin/logout",
+	"/api/user/captcha",
 	"/api/user/login",
 	"/api/user/register",
 	"/api/user/refresh-token",

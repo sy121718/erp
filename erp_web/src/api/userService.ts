@@ -23,6 +23,14 @@ export interface UserInfo {
 export interface UserLoginParams {
   username: string
   password: string
+  captcha_id: string
+  captcha_code: string
+}
+
+/** 验证码结果 */
+export interface UserCaptchaResult {
+  captcha_id: string
+  code: string
 }
 
 /** 用户登录结果 */
@@ -88,6 +96,10 @@ export interface AdminUpdateUserParams {
 // ========== 用户侧 API ==========
 
 export const userService = {
+  getCaptcha: (): Promise<UserCaptchaResult> => {
+    return request.get('/user/captcha')
+  },
+
   login: (params: UserLoginParams): Promise<UserLoginResult> => {
     return request.post('/user/login', params)
   },

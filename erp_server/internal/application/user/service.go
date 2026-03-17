@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"erp-server/internal/domain/user"
+	"erp-server/pkg/captcha"
 	"erp-server/pkg/errors"
 	"erp-server/pkg/jwt"
 	"erp-server/pkg/token"
@@ -73,9 +74,11 @@ func (s *UserService) Register(ctx context.Context, req *RegisterRequest) (*user
 
 // LoginRequest 登录请求
 type LoginRequest struct {
-	Username string
-	Password string
-	IP       string
+	Username    string
+	Password    string
+	CaptchaID   string
+	CaptchaCode string
+	IP          string
 }
 
 // LoginResponse 登录响应
@@ -87,6 +90,13 @@ type LoginResponse struct {
 
 // Login 用户登录
 func (s *UserService) Login(ctx context.Context, req *LoginRequest) (*LoginResponse, error) {
+	// 验证验证码
+	if req.CaptchaID != "" && req.CaptchaCode != "" {
+		if !captcha.Get().Verify(req.CaptchaID, req.CaptchaCode, true) {
+			return nil, errors.NewBadRequest(400005, user.ErrCaptchaInvalid.Message())
+		}
+	}
+
 	entity, err := s.repo.FindByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errors.ErrDatabase.WithError(err)

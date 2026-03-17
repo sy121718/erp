@@ -8,6 +8,7 @@ var (
 	ErrAccountDisabled      = NewUserError(20003, "账户已禁用")
 	ErrOldPasswordIncorrect = NewUserError(20004, "原密码错误")
 	ErrCannotBanSelf        = NewUserError(20005, "不能操作自己")
+	ErrCaptchaInvalid       = NewUserError(20006, "验证码错误")
 )
 
 // UserError 用户错误

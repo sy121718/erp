@@ -24,6 +24,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
 	initHandler()
 
 	// 公开接口（无需认证）
+	r.GET("/captcha", handler.GetCaptcha)
 	r.POST("/register", handler.Register)
 	r.POST("/login", handler.Login)
 	r.POST("/refresh-token", handler.RefreshToken)

@@ -80,7 +80,7 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   document.title = `${to.meta.title || '妙手ERP'} - 妙手ERP`
 
   const userStore = useUserStore()
@@ -99,6 +99,16 @@ router.beforeEach((to, from, next) => {
   if (!isLoggedIn) {
     next({ name: 'UserLogin' })
     return
+  }
+
+  // 页面刷新后，先加载用户信息再做权限校验
+  if (!userStore.initialized) {
+    await userStore.initUserInfo()
+    // initUserInfo 失败会 clearAuth，再次检查登录态
+    if (!userStore.isLoggedIn) {
+      next({ name: 'UserLogin' })
+      return
+    }
   }
 
   if (to.meta.userTypes && userType && !to.meta.userTypes.includes(userType as 'admin' | 'user')) {

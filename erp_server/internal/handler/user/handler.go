@@ -3,6 +3,7 @@ package user
 import (
 	service "erp-server/internal/application/user"
 	"erp-server/internal/handler/middleware"
+	"erp-server/pkg/captcha"
 	"erp-server/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,16 @@ type Handler struct {
 // NewHandler 创建处理器
 func NewHandler(svc *service.UserService) *Handler {
 	return &Handler{svc: svc}
+}
+
+// GetCaptcha 获取验证码
+// GET /api/user/captcha
+func (h *Handler) GetCaptcha(c *gin.Context) {
+	id, code := captcha.Get().Generate()
+	utils.Success(c, gin.H{
+		"captcha_id": id,
+		"code":       code,
+	})
 }
 
 // Register 用户注册
@@ -51,9 +62,11 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	resp, err := h.svc.Login(c.Request.Context(), &service.LoginRequest{
-		Username: req.Username,
-		Password: req.Password,
-		IP:       c.ClientIP(),
+		Username:    req.Username,
+		Password:    req.Password,
+		CaptchaID:   req.CaptchaID,
+		CaptchaCode: req.CaptchaCode,
+		IP:          c.ClientIP(),
 	})
 	if err != nil {
 		c.Error(err)
