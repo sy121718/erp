@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { layer } from '@layui/layui-vue'
+import { useUserStore } from '@/stores/user'
 
 interface UserInfo {
   nickname: string
@@ -32,6 +35,9 @@ const emit = defineEmits<{
   navClick: [nav: string]
 }>()
 
+const router = useRouter()
+const userStore = useUserStore()
+
 const mainNavs = ref<NavItem[]>([
   { title: '首页', path: '/dashboard' },
   { title: '产品', path: '/product' },
@@ -59,6 +65,27 @@ const handleToggle = () => {
 
 const handleNavClick = (nav: NavItem) => {
   emit('navClick', nav.title)
+}
+
+// 跳转到个人中心
+const handleProfile = () => {
+  router.push('/profile')
+}
+
+// 退出登录
+const handleLogout = async () => {
+  // 先清除本地认证信息
+  userStore.clearAuth()
+  // 跳转登录页
+  router.push('/ms-auth-admin')
+  layer.msg('退出成功', { icon: 1, time: 1000 })
+
+  // 尝试调用后端退出接口（可选，失败也不影响）
+  try {
+    await userStore.logout()
+  } catch (error) {
+    // 忽略错误，错误由 request.ts 统一处理
+  }
 }
 </script>
 
@@ -108,7 +135,7 @@ const handleNavClick = (nav: NavItem) => {
       <lay-dropdown>
         <div class="user-info">
           <lay-avatar
-            :src="props.userInfo.avatar"
+            :src="props.userInfo.avatar || '/image/avatar.png'"
             :text="props.userInfo.nickname?.charAt(0)"
             size="sm"
             class="user-avatar"
@@ -117,7 +144,7 @@ const handleNavClick = (nav: NavItem) => {
         </div>
         <template #content>
           <lay-dropdown-menu>
-            <lay-dropdown-menu-item>
+            <lay-dropdown-menu-item @click="handleProfile">
               <lay-icon type="layui-icon-username" />
               个人中心
             </lay-dropdown-menu-item>
@@ -125,7 +152,7 @@ const handleNavClick = (nav: NavItem) => {
               <lay-icon type="layui-icon-set" />
               系统设置
             </lay-dropdown-menu-item>
-            <lay-dropdown-menu-item divided>
+            <lay-dropdown-menu-item divided @click="handleLogout">
               <lay-icon type="layui-icon-logout" />
               退出登录
             </lay-dropdown-menu-item>

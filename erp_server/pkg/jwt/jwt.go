@@ -219,3 +219,45 @@ func GenerateRandomSecret(length int) (string, error) {
 	}
 	return base64.URLEncoding.EncodeToString(bytes), nil
 }
+
+// ShouldRefreshToken 检查token是否需要续期
+// 如果token剩余时间少于总有效期的30%，则应该续期
+func (j *JWT) ShouldRefreshToken(claims *Claims) bool {
+	if claims.ExpiresAt == nil {
+		return false
+	}
+
+	// 计算剩余时间
+	now := time.Now()
+	expiresAt := claims.ExpiresAt.Time
+	remaining := expiresAt.Sub(now)
+
+	// 计算总有效期
+	totalDuration := j.config.GetAccessTokenDuration()
+
+	// 如果剩余时间小于总有效期的30%，则需要续期
+	return remaining < time.Duration(float64(totalDuration.Seconds())*0.3)
+}
+
+// RefreshAccessToken 为现有的claims生成新的access_token
+func (j *JWT) RefreshAccessToken(claims *Claims) (string, error) {
+	tokenID := generateTokenID()
+	now := time.Now()
+	newClaims := Claims{
+		UserID:   claims.UserID,
+		Username: claims.Username,
+		Name:     claims.Name,
+		IsAdmin:  claims.IsAdmin,
+		TokenID:  tokenID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        tokenID,
+			ExpiresAt: jwt.NewNumericDate(now.Add(j.config.GetAccessTokenDuration())),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			Issuer:    j.config.GetIssuer(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
+	return token.SignedString([]byte(j.config.GetSecret()))
+}

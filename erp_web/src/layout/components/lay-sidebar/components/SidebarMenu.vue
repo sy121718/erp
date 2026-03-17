@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-
-interface MenuChild {
-  id: string
-  title: string
-  badge?: string
-  badgeType?: 'new' | 'hot' | 'ai'
-  active?: boolean
-}
+import { ref, watch } from 'vue'
 
 interface MenuItem {
   id: string
@@ -16,8 +8,9 @@ interface MenuItem {
   iconColor?: string
   badge?: string
   badgeType?: 'new' | 'hot' | 'ai'
-  children?: MenuChild[]
-  expanded?: boolean
+  children?: MenuItem[]
+  path?: string
+  order?: number
 }
 
 interface Props {
@@ -27,7 +20,15 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const expandedMenus = ref<Set<string>>(new Set(['general']))
+// 默认展开第一个菜单
+const expandedMenus = ref<Set<string>>(new Set())
+
+// 监听菜单列表，默认展开第一个有子菜单的项
+watch(() => props.menuList, (newList) => {
+  if (newList.length > 0 && newList[0].children && newList[0].children.length > 0) {
+    expandedMenus.value.add(newList[0].id)
+  }
+}, { immediate: true })
 
 const isExpanded = (menuId: string) => {
   return expandedMenus.value.has(menuId)
@@ -95,7 +96,7 @@ const getBadgeClass = (type?: 'new' | 'hot' | 'ai') => {
               v-for="child in menu.children"
               :key="child.id"
               class="sub-menu-item"
-              :class="{ active: child.active || props.activeMenu === child.id }"
+              :class="{ active: props.activeMenu === child.id }"
               @click="handleMenuClick(child.id)"
             >
               <span class="item-text">{{ child.title }}</span>

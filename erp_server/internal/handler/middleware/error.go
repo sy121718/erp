@@ -87,7 +87,7 @@ func handleAppError(c *gin.Context, err *errors.AppError) {
 // BindJSON 绑定 JSON 参数，失败时返回错误
 func BindJSON(c *gin.Context, obj interface{}) bool {
 	if err := c.ShouldBindJSON(obj); err != nil {
-		c.Error(errors.ErrInvalidJSON.WithError(err))
+		c.Error(errors.ErrInvalidParams.WithError(err))
 		return false
 	}
 	return true

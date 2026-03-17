@@ -68,7 +68,7 @@ func NewInternalError(errCode int, message string) *AppError {
 // 预定义通用错误
 var (
 	// 400 Bad Request
-	ErrInvalidParams    = NewBadRequest(400001, "请求参数错误")
+	ErrInvalidParams    = NewBadRequest(400001, "用户名或密码错误")
 	ErrInvalidJSON      = NewBadRequest(400002, "JSON格式错误")
 	ErrMissingField     = NewBadRequest(400003, "缺少必填字段")
 	ErrInvalidField     = NewBadRequest(400004, "字段格式错误")

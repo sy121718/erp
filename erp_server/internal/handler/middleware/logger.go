@@ -21,17 +21,37 @@ func Logger() gin.HandlerFunc {
 		latency := time.Since(start)
 		status := c.Writer.Status()
 		method := c.Request.Method
+		clientIP := c.ClientIP()
 
 		if query != "" {
 			path = path + "?" + query
 		}
 
-		log.Info("请求日志",
-			zap.Int("status", status),
-			zap.String("method", method),
-			zap.String("path", path),
-			zap.Duration("latency", latency),
-			zap.String("ip", c.ClientIP()),
-		)
+		// 根据状态码使用不同的日志级别
+		if status >= 500 {
+			log.Error("Server Error",
+				zap.Int("status", status),
+				zap.String("method", method),
+				zap.String("path", path),
+				zap.Duration("latency", latency),
+				zap.String("ip", clientIP),
+			)
+		} else if status >= 400 {
+			log.Warn("Client Error",
+				zap.Int("status", status),
+				zap.String("method", method),
+				zap.String("path", path),
+				zap.Duration("latency", latency),
+				zap.String("ip", clientIP),
+			)
+		} else {
+			log.Info("Request Success",
+				zap.Int("status", status),
+				zap.String("method", method),
+				zap.String("path", path),
+				zap.Duration("latency", latency),
+				zap.String("ip", clientIP),
+			)
+		}
 	}
 }

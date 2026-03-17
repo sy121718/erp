@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@layui/layui-vue": "^2.23.3",
+    "@types/crypto-js": "^4.2.2",
     "axios": "^1.13.6",
+    "crypto-js": "^4.2.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.25",
     "vue-router": "^4.6.4"

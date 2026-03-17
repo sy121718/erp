@@ -2,9 +2,11 @@ package sign
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"sort"
 	"strings"
 	"time"
@@ -127,7 +129,14 @@ func (s *Signer) generateNonce(length int) string {
 	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
 	for i := 0; i < length; i++ {
-		result[i] = chars[i%len(chars)]
+		// 使用 crypto/rand 生成安全的随机数
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+		if err != nil {
+			// 如果随机数生成失败，使用时间戳作为后备方案
+			result[i] = chars[int(time.Now().UnixNano())%len(chars)]
+			continue
+		}
+		result[i] = chars[n.Int64()]
 	}
 	return string(result)
 }

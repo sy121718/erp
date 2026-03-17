@@ -187,9 +187,15 @@ func (h *Handler) List(c *gin.Context) {
 	})
 }
 
-// Create 创建管理员
+// Create 创建管理员（仅超管）
 // POST /api/admin/create
 func (h *Handler) Create(c *gin.Context) {
+	// 检查是否是超管
+	if !middleware.GetIsAdmin(c) {
+		c.Error(errors.ErrNotAdmin)
+		return
+	}
+
 	var req CreateAdminRequest
 	if !middleware.BindJSON(c, &req) {
 		return
@@ -213,9 +219,15 @@ func (h *Handler) Create(c *gin.Context) {
 	utils.Success(c, ToResponse(entity))
 }
 
-// Update 更新管理员
+// Update 更新管理员（仅超管）
 // POST /api/admin/update/:id
 func (h *Handler) Update(c *gin.Context) {
+	// 检查是否是超管
+	if !middleware.GetIsAdmin(c) {
+		c.Error(errors.ErrNotAdmin)
+		return
+	}
+
 	id, ok := middleware.ParseID(c)
 	if !ok {
 		return

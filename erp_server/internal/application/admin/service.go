@@ -50,7 +50,7 @@ func (s *AdminService) Login(ctx context.Context, req *LoginRequest) (*LoginResp
 	// 验证验证码
 	if req.CaptchaID != "" && req.CaptchaCode != "" {
 		if !captcha.Get().Verify(req.CaptchaID, req.CaptchaCode, true) {
-			return nil, errors.ErrInvalidParams.WithError(admin.ErrCaptchaInvalid)
+			return nil, errors.NewBadRequest(400005, admin.ErrCaptchaInvalid.Message())
 		}
 	}
 
@@ -60,7 +60,8 @@ func (s *AdminService) Login(ctx context.Context, req *LoginRequest) (*LoginResp
 		return nil, errors.ErrDatabase.WithError(err)
 	}
 	if entity == nil {
-		return nil, errors.ErrUserNotFound.WithError(admin.ErrAdminNotFound)
+		// 用户不存在也返回"用户名或密码错误"（安全考虑，不暴露用户是否存在）
+		return nil, errors.NewUnauthorized(401001, admin.ErrPasswordIncorrect.Message())
 	}
 
 	// 检查账户状态
@@ -80,7 +81,7 @@ func (s *AdminService) Login(ctx context.Context, req *LoginRequest) (*LoginResp
 			entity.Lock(30 * time.Minute)
 		}
 		s.repo.Update(ctx, entity)
-		return nil, errors.ErrUnauthorized.WithError(admin.ErrPasswordIncorrect)
+		return nil, errors.NewUnauthorized(401001, admin.ErrPasswordIncorrect.Message())
 	}
 
 	// 重置失败次数并更新登录信息

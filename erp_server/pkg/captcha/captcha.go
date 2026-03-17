@@ -94,7 +94,7 @@ func Init(cfg *Config) {
 	if cfg == nil {
 		cfg = &Config{
 			Length:     6,
-			ExpireTime: 5 * time.Minute,
+			ExpireTime: 1 * time.Minute,
 			Width:      120,
 			Height:     40,
 		}

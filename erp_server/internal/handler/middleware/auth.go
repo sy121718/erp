@@ -1,6 +1,10 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
 	"strconv"
 	"strings"
 
@@ -20,6 +24,7 @@ var whiteList = []string{
 	"/api/admin/login",
 	"/api/admin/captcha",
 	"/api/admin/refresh-token",
+	"/api/admin/logout",
 }
 
 // Auth 认证中间件（JWT + 签名验证）
@@ -63,6 +68,21 @@ func Auth() gin.HandlerFunc {
 		c.Set("username", claims.Username)
 		c.Set("name", claims.Name)
 		c.Set("is_admin", claims.IsAdmin)
+
+		// 4. 检查token是否需要续期
+		if jwt.Get().ShouldRefreshToken(claims) {
+			// 生成新的token
+			newToken, _, err := jwt.Get().GenerateAccessToken(
+				claims.UserID,
+				claims.Username,
+				claims.Name,
+				claims.IsAdmin,
+			)
+			if err == nil {
+				// 在响应头中返回新的token
+				c.Header("X-New-Access-Token", newToken)
+			}
+		}
 
 		c.Next()
 	}
@@ -126,16 +146,56 @@ func verifySign(c *gin.Context) bool {
 	// 获取请求参数
 	params := make(map[string]string)
 	if c.Request.Method == "GET" {
+		// GET 请求：从 query 参数获取
 		query := c.Request.URL.Query()
 		for k, v := range query {
 			if len(v) > 0 {
 				params[k] = v[0]
 			}
 		}
+	} else if c.Request.Method == "POST" || c.Request.Method == "PUT" || c.Request.Method == "DELETE" {
+		// POST/PUT/DELETE 请求：从 body 读取参数
+		// 注意：需要先读取 body，然后重新设置回去
+		bodyBytes, err := c.GetRawData()
+		if err == nil && len(bodyBytes) > 0 {
+			// 将 body 重新设置回去，供后续处理使用
+			c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+			// 解析 JSON body
+			var bodyMap map[string]interface{}
+			if err := json.Unmarshal(bodyBytes, &bodyMap); err == nil {
+				// 递归展平嵌套对象
+				flattenMap(bodyMap, "", params)
+			}
+		}
 	}
 
 	// 验证签名
 	return sign.Get().Verify(params, timestamp, nonce, signature)
+}
+
+// flattenMap 递归展平嵌套的 map
+func flattenMap(obj map[string]interface{}, prefix string, result map[string]string) {
+	for key, value := range obj {
+		newKey := prefix
+		if prefix != "" {
+			newKey += "."
+		}
+		newKey += key
+
+		// 跳过 nil 值
+		if value == nil {
+			continue
+		}
+
+		// 如果是嵌套对象（map）
+		if nested, ok := value.(map[string]interface{}); ok {
+			flattenMap(nested, newKey, result)
+		} else {
+			// 转换为字符串
+			result[newKey] = fmt.Sprintf("%v", value)
+		}
+	}
 }
 
 // GetUserID 从上下文获取用户ID
