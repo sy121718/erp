@@ -108,17 +108,25 @@ export const useAdminList = () => {
   }
 
   // 编辑
-  const handleEdit = (row: AdminInfo) => {
+  const handleEdit = async (row: AdminInfo) => {
     formMode.value = 'edit'
-    Object.assign(formData, {
-      id: row.id,
-      username: row.username,
-      password: '',
-      name: row.name,
-      email: row.email || '',
-      phone: row.phone || ''
-    })
+    formLoading.value = true
     formVisible.value = true
+    try {
+      const detail = await adminService.getDetail(row.id)
+      Object.assign(formData, {
+        id: detail.id,
+        username: detail.username,
+        password: '',
+        name: detail.name,
+        email: detail.email || '',
+        phone: detail.phone || ''
+      })
+    } catch (error) {
+      formVisible.value = false
+    } finally {
+      formLoading.value = false
+    }
   }
 
   // 提交表单

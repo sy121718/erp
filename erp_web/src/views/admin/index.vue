@@ -101,11 +101,12 @@ const {
       </lay-table>
     </lay-card>
 
-    <!-- 新增/编辑/查看弹窗 -->
+    <!-- 新增/编辑弹窗 -->
     <lay-layer
       v-model="formVisible"
       :title="formMode === 'create' ? '新增管理员' : '编辑管理员'"
       :area="['600px', 'auto']"
+      :loading="formLoading"
       :btn="[
         { text: '取消', callback: () => formVisible = false },
         { text: '确定', callback: handleSubmit }
