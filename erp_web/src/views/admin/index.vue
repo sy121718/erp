@@ -154,6 +154,16 @@ const {
             allow-clear
           />
         </lay-form-item>
+
+        <lay-form-item v-if="formMode === 'edit'" label="状态">
+          <lay-tag :type="formData.status === 1 ? 'normal' : 'danger'">
+            {{ formData.status === 1 ? '正常' : '禁用' }}
+          </lay-tag>
+        </lay-form-item>
+
+        <lay-form-item v-if="formMode === 'edit'" label="创建时间">
+          <lay-input :model-value="formData.create_time" disabled />
+        </lay-form-item>
       </lay-form>
     </lay-layer>
   </div>

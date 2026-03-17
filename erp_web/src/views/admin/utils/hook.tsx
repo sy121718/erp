@@ -31,7 +31,9 @@ export const useAdminList = () => {
     password: '',
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    status: undefined,
+    create_time: undefined
   })
 
   // 表格列配置
@@ -102,7 +104,9 @@ export const useAdminList = () => {
       password: '',
       name: '',
       email: '',
-      phone: ''
+      phone: '',
+      status: undefined,
+      create_time: undefined
     })
     formVisible.value = true
   }
@@ -120,7 +124,9 @@ export const useAdminList = () => {
         password: '',
         name: detail.name,
         email: detail.email || '',
-        phone: detail.phone || ''
+        phone: detail.phone || '',
+        status: detail.status,
+        create_time: detail.create_time
       })
     } catch (error) {
       formVisible.value = false
