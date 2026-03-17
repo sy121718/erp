@@ -337,8 +337,7 @@ func (s *AdminService) Ban(ctx context.Context, operatorID, targetID int64) erro
 		return errors.ErrForbidden.WithError(admin.ErrCannotModifyAdmin)
 	}
 
-	entity.Disable()
-	if err := s.repo.Update(ctx, entity); err != nil {
+	if err := s.repo.UpdateStatus(ctx, targetID, admin.StatusDisabled); err != nil {
 		return errors.ErrDatabase.WithError(err)
 	}
 
@@ -354,8 +353,11 @@ func (s *AdminService) Unban(ctx context.Context, targetID int64) error {
 	if err != nil {
 		return err
 	}
-	entity.Enable()
-	if err := s.repo.Update(ctx, entity); err != nil {
+	// 不能解禁超级管理员（超管不应该被禁用）
+	if entity.IsAdmin {
+		return errors.ErrForbidden.WithError(admin.ErrCannotModifyAdmin)
+	}
+	if err := s.repo.UpdateStatus(ctx, targetID, admin.StatusEnabled); err != nil {
 		return errors.ErrDatabase.WithError(err)
 	}
 	return nil
