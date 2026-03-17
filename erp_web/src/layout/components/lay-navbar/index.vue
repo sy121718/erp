@@ -74,17 +74,15 @@ const handleProfile = () => {
 
 // 退出登录
 const handleLogout = async () => {
-  // 先清除本地认证信息
+  const loginPath = userStore.getLoginPath()
   userStore.clearAuth()
-  // 跳转登录页
-  router.push('/ms-auth-admin')
+  router.push(loginPath)
   layer.msg('退出成功', { icon: 1, time: 1000 })
 
-  // 尝试调用后端退出接口（可选，失败也不影响）
   try {
     await userStore.logout()
   } catch (error) {
-    // 忽略错误，错误由 request.ts 统一处理
+    // 忽略错误
   }
 }
 </script>

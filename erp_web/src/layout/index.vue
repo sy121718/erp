@@ -37,8 +37,9 @@ const handleLogout = async () => {
         text: '确定',
         callback: async (id: string | number) => {
           layer.close(id)
+          const loginPath = userStore.getLoginPath()
           await userStore.logout()
-          router.push('/ms-auth-admin')
+          router.push(loginPath)
         }
       },
       {

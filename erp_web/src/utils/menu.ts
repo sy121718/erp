@@ -47,6 +47,14 @@ export function generateMenuFromRoutes(): MenuItem[] {
       return
     }
 
+    // 跳过 userTypes 不匹配的路由
+    if (route.meta?.userTypes && userStore.userType) {
+      if (!route.meta.userTypes.includes(userStore.userType as 'admin' | 'user')) {
+        console.log('🔒 跳过用户类型不匹配的路由:', route.path, 'need:', route.meta.userTypes, 'current:', userStore.userType)
+        return
+      }
+    }
+
     // 只处理有 title 的路由
     if (!route.meta?.title) {
       console.log('⏭️ 跳过无标题路由:', route.path)

@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { layer } from '@layui/layui-vue'
-import router, { ADMIN_LOGIN_PATH } from '@/router'
+import router, { ADMIN_LOGIN_PATH, USER_LOGIN_PATH } from '@/router'
 import { isWhiteListed, addSignToRequest } from '@/utils/sign'
 
 const request = axios.create({
@@ -65,12 +65,14 @@ request.interceptors.response.use(
 
     // 401 未授权 - Token 过期
     if (response?.status === 401) {
-      // 清除本地认证信息
+      const userType = localStorage.getItem('user_type')
+
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user_type')
 
-      // 跳转到登录页
-      router.push(ADMIN_LOGIN_PATH)
+      const loginPath = userType === 'admin' ? ADMIN_LOGIN_PATH : USER_LOGIN_PATH
+      router.push(loginPath)
       layer.msg('登录已过期，请重新登录', { icon: 2 })
 
       return Promise.reject(error)

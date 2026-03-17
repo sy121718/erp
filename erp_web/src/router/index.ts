@@ -1,19 +1,19 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
-// Admin 登录路径（不使用常用路径）
 const ADMIN_LOGIN_PATH = '/ms-auth-admin'
+const USER_LOGIN_PATH = '/login'
 
-// 扩展路由元信息类型
 declare module 'vue-router' {
   interface RouteMeta {
     title?: string
     requiresAuth?: boolean
-    hidden?: boolean // 是否在菜单中隐藏
-    icon?: string // 菜单图标
-    parent?: string // 父菜单ID（用于分组）
-    order?: number // 排序
-    requiresAdmin?: boolean // 是否需要超管权限
+    hidden?: boolean
+    icon?: string
+    parent?: string
+    order?: number
+    requiresAdmin?: boolean
+    userTypes?: ('admin' | 'user')[]
   }
 }
 
@@ -23,6 +23,12 @@ const routes: RouteRecordRaw[] = [
     name: 'AdminLogin',
     component: () => import('@/views/login-admin/index.vue'),
     meta: { title: '管理员登录', requiresAuth: false, hidden: true }
+  },
+  {
+    path: USER_LOGIN_PATH,
+    name: 'UserLogin',
+    component: () => import('@/views/login-user/index.vue'),
+    meta: { title: '用户登录', requiresAuth: false, hidden: true }
   },
   {
     path: '/',
@@ -39,13 +45,19 @@ const routes: RouteRecordRaw[] = [
         path: 'admin',
         name: 'AdminList',
         component: () => import('@/views/admin/index.vue'),
-        meta: { title: '管理员管理', parent: 'system', order: 1, requiresAdmin: true }
+        meta: { title: '管理员管理', parent: 'system', order: 1, requiresAdmin: true, userTypes: ['admin'] }
+      },
+      {
+        path: 'user-manage',
+        name: 'UserManage',
+        component: () => import('@/views/user/index.vue'),
+        meta: { title: '用户管理', parent: 'system', order: 2, userTypes: ['admin'] }
       },
       {
         path: 'profile',
         name: 'Profile',
         component: () => import('@/views/profile-admin/index.vue'),
-        meta: { title: '个人中心', hidden: true }
+        meta: { title: '个人中心', hidden: true, userTypes: ['admin'] }
       },
       {
         path: 'collection',
@@ -68,33 +80,32 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫
 router.beforeEach((to, from, next) => {
-  // 设置页面标题
   document.title = `${to.meta.title || '妙手ERP'} - 妙手ERP`
 
   const userStore = useUserStore()
   const isLoggedIn = userStore.isLoggedIn
+  const userType = userStore.userType
 
-  // 不需要登录的页面
   if (to.meta.requiresAuth === false) {
+    if (isLoggedIn && (to.name === 'AdminLogin' || to.name === 'UserLogin')) {
+      next('/dashboard')
+      return
+    }
     next()
     return
   }
 
-  // 需要登录但未登录，跳转到 404（不暴露登录页）
-  if (!isLoggedIn && to.path !== ADMIN_LOGIN_PATH) {
+  if (!isLoggedIn) {
+    next({ name: 'UserLogin' })
+    return
+  }
+
+  if (to.meta.userTypes && userType && !to.meta.userTypes.includes(userType as 'admin' | 'user')) {
     next({ name: 'NotFound' })
     return
   }
 
-  // 已登录但访问登录页
-  if (isLoggedIn && to.path === ADMIN_LOGIN_PATH) {
-    next('/dashboard')
-    return
-  }
-
-  // 需要超管权限的页面
   if (to.meta.requiresAdmin && !userStore.isAdmin) {
     next({ name: 'NotFound' })
     return
@@ -104,4 +115,4 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-export { ADMIN_LOGIN_PATH }
+export { ADMIN_LOGIN_PATH, USER_LOGIN_PATH }
