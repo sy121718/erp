@@ -1,159 +1,60 @@
 # 页面视图规范
 
-## 目录结构
-
-```
-src/views/
-├── CLAUDE.md
-├── dashboard/
-│   └── index.vue           # 首页
-├── user/
-│   ├── index.vue           # 用户列表
-│   └── components/         # 用户页面专用组件
-│       ├── UserForm.vue    # 用户表单弹窗
-│       └── UserDetail.vue  # 用户详情抽屉
-├── login-admin/            # 复杂页面示例
-│   ├── index.vue           # 页面视图 (纯模板)
-│   └── utils/              # 业务逻辑抽取
-│       ├── types.ts        # 类型定义
-│       └── hook.tsx        # 组合式函数 (useLogin)
-└── product/
-    ├── index.vue
-    └── components/
-        └── ...
-```
-
-## 页面结构
-
-```vue
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { userService } from '@/api'
-import UserForm from './components/UserForm.vue'
-
-// 列表数据
-const loading = ref(false)
-const tableData = ref([])
-const pagination = ref({ page: 1, size: 10, total: 0 })
-
-// 弹窗控制
-const formVisible = ref(false)
-const formRef = ref()
-
-// 方法
-const fetchData = async () => {
-  loading.value = true
-  const res = await userService.getList(pagination.value)
-  tableData.value = res.list
-  pagination.value.total = res.total
-  loading.value = false
-}
-
-const handleAdd = () => {
-  formVisible.value = true
-}
-
-onMounted(() => {
-  fetchData()
-})
-</script>
-
-<template>
-  <div class="page-container">
-    <!-- 搜索区域 -->
-    <lay-card class="mb-4">
-      <!-- 搜索表单 -->
-    </lay-card>
-
-    <!-- 表格区域 -->
-    <lay-card>
-      <div class="flex justify-between mb-4">
-        <lay-button type="primary" @click="handleAdd">新增</lay-button>
-      </div>
-      <lay-table :columns="columns" :dataSource="tableData" :loading="loading" />
-      <lay-page v-model="pagination.page" :total="pagination.total" />
-    </lay-card>
-
-    <!-- 弹窗 -->
-    <UserForm v-model:visible="formVisible" @success="fetchData" />
-  </div>
-</template>
-
-<style scoped>
-.page-container {
-  padding: 16px;
-}
-</style>
-```
-
-## 页面规范
-
-### 列表页面
-
-- 搜索区域 + 表格区域 + 分页
-- 操作按钮放在表格上方
-- 使用 `lay-card` 包裹
-
-### 表单弹窗
-
-- 放在 `components/` 目录
-- 使用 `v-model:visible` 控制显示
-- 提交成功后 emit `success` 事件
-
-### 样式
-
-- 页面容器使用 16px 内边距
-- 卡片间距使用 `mb-4` (16px)
-- 使用 CSS 变量 `var(--erp-*)`
-
-### 复杂页面拆分规范
-
-当页面逻辑较复杂时，必须拆分为以下结构：
+## 页面结构（参考 `admin/`）
 
 ```
 page-name/
-├── index.vue       # 页面视图，只保留模板
+├── index.vue               # 页面编排：引用组件 + 解构 hook，禁止写业务逻辑
+├── components/             # 页面专用组件
+│   ├── XxxTable.vue        # 表格：columns + 插槽 + emit 事件
+│   ├── XxxAddForm.vue      # 新增弹窗：自管 formData、校验、提交
+│   └── XxxEditForm.vue     # 编辑弹窗：自加载详情、自管 formData、提交
 └── utils/
-    ├── types.ts    # 类型定义
-    └── hook.tsx    # 组合式函数
+    ├── types.ts            # 页面级类型（SearchForm、Pagination）
+    └── hook.tsx            # 页面状态：搜索/分页/列表数据 + 弹窗开关 + 行操作
 ```
 
-**types.ts 规范：**
-- 定义页面相关的所有 TypeScript 接口和类型
-- 导出类型供 hook 和 index.vue 使用
+## 组件化规则
 
-**hook.tsx 规范：**
-- 使用 `use` 前缀命名组合式函数，如 `useLogin`、`useUserList`
-- 包含所有状态 (ref、reactive、computed)
-- 包含所有方法 (事件处理、API 调用)
-- 返回页面需要的所有数据和方法
+**必须拆为独立组件**：表格、新增弹窗、编辑弹窗、详情弹窗/抽屉
 
-**index.vue 规范：**
-- 从 `./utils/hook` 导入组合式函数
-- 只保留模板代码，禁止在 `<script>` 中写业务逻辑
+**禁止在 index.vue 中写**：`lay-layer`、`lay-table` + 列配置、表单校验/提交逻辑
 
-**示例：**
+## 各文件职责
 
-```typescript
-// utils/types.ts
-export interface LoginForm {
-  username: string
-  password: string
-}
+| 文件 | 职责 | 不做 |
+|------|------|------|
+| `index.vue` | 引用组件、解构 hook、模板编排 | 业务逻辑、弹窗/表格模板 |
+| `hook.tsx` | 搜索/分页/数据获取、弹窗 visible 控制、confirm 类行操作 | 表单数据、列配置 |
+| `types.ts` | 页面级共享类型 | 业务实体类型（放 `api/`） |
+| `XxxTable.vue` | props: data/loading/pagination，emit: edit/delete/pageChange 等 | 调 API |
+| `XxxAddForm.vue` | props: v-model:visible，emit: success | 依赖外部状态 |
+| `XxxEditForm.vue` | props: v-model:visible + targetId，emit: success | 依赖外部状态 |
 
-// utils/hook.tsx
-export const useLogin = () => {
-  const formData = ref<LoginForm>({ username: '', password: '' })
-  const loading = ref(false)
-  
-  const handleLogin = async () => { /* ... */ }
-  
-  return { formData, loading, handleLogin }
-}
+## 弹窗统一结构
 
-// index.vue
-<script setup lang="ts">
-import { useLogin } from './utils/hook'
-const { formData, loading, handleLogin } = useLogin()
-</script>
+```vue
+<lay-layer :modelValue="visible" @update:modelValue="(v: boolean) => emit('update:visible', v)"
+  title="xxx" :area="['480px', 'auto']">
+  <div class="dialog-form">
+    <lay-form>...</lay-form>
+    <div class="dialog-form__footer">
+      <lay-button @click="emit('update:visible', false)">取消</lay-button>
+      <lay-button type="primary" :loading="loading" @click="handleSubmit">确定</lay-button>
+    </div>
+  </div>
+</lay-layer>
 ```
+
+```css
+.dialog-form { padding: 20px 24px 0; }
+.dialog-form__footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 16px 0; border-top: 1px solid var(--erp-border-color); margin-top: 8px;
+}
+```
+
+## 样式
+
+- 页面容器 `padding: 16px`，卡片间距 `mb-4`，弹窗宽度 `480px`
+- 使用 CSS 变量 `var(--erp-*)`
