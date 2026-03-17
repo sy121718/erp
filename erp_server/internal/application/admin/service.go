@@ -90,12 +90,12 @@ func (s *AdminService) Login(ctx context.Context, req *LoginRequest) (*LoginResp
 	s.repo.Update(ctx, entity)
 
 	// 生成Token
-	accessToken, _, err := jwt.Get().GenerateAccessToken(entity.ID, entity.Username, entity.Name, entity.IsAdmin)
+	accessToken, _, err := jwt.Get().GenerateAccessToken(entity.ID, entity.Username, entity.Name, entity.IsAdmin, jwt.UserTypeAdmin)
 	if err != nil {
 		return nil, errors.ErrInternal.WithError(err)
 	}
 
-	refreshToken, refreshTokenID, err := jwt.Get().GenerateRefreshToken(entity.ID, entity.Username, entity.IsAdmin)
+	refreshToken, refreshTokenID, err := jwt.Get().GenerateRefreshToken(entity.ID, entity.Username, entity.IsAdmin, jwt.UserTypeAdmin)
 	if err != nil {
 		return nil, errors.ErrInternal.WithError(err)
 	}
@@ -391,12 +391,12 @@ func (s *AdminService) RefreshToken(ctx context.Context, oldRefreshToken string)
 	_ = s.tokenStore.RemoveUserTokenID(ctx, claims.UserID, claims.TokenID)
 
 	// 生成新的Token
-	accessToken, _, err := jwt.Get().GenerateAccessToken(claims.UserID, claims.Username, "", claims.IsAdmin)
+	accessToken, _, err := jwt.Get().GenerateAccessToken(claims.UserID, claims.Username, "", claims.IsAdmin, jwt.UserTypeAdmin)
 	if err != nil {
 		return nil, errors.ErrInternal.WithError(err)
 	}
 
-	refreshToken, refreshTokenID, err := jwt.Get().GenerateRefreshToken(claims.UserID, claims.Username, claims.IsAdmin)
+	refreshToken, refreshTokenID, err := jwt.Get().GenerateRefreshToken(claims.UserID, claims.Username, claims.IsAdmin, jwt.UserTypeAdmin)
 	if err != nil {
 		return nil, errors.ErrInternal.WithError(err)
 	}

@@ -25,6 +25,9 @@ var whiteList = []string{
 	"/api/admin/captcha",
 	"/api/admin/refresh-token",
 	"/api/admin/logout",
+	"/api/user/login",
+	"/api/user/register",
+	"/api/user/refresh-token",
 }
 
 // Auth 认证中间件（JWT + 签名验证）
@@ -64,19 +67,24 @@ func Auth() gin.HandlerFunc {
 		}
 
 		// 3. 将用户信息存入上下文
+		userType := claims.UserType
+		if userType == "" {
+			userType = jwt.UserTypeAdmin
+		}
 		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Set("name", claims.Name)
 		c.Set("is_admin", claims.IsAdmin)
+		c.Set("user_type", userType)
 
 		// 4. 检查token是否需要续期
 		if jwt.Get().ShouldRefreshToken(claims) {
-			// 生成新的token
 			newToken, _, err := jwt.Get().GenerateAccessToken(
 				claims.UserID,
 				claims.Username,
 				claims.Name,
 				claims.IsAdmin,
+				userType,
 			)
 			if err == nil {
 				// 在响应头中返回新的token
@@ -88,11 +96,37 @@ func Auth() gin.HandlerFunc {
 	}
 }
 
-// AdminOnly 仅管理员可访问
+// AdminOnly 仅超级管理员可访问
 func AdminOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		isAdmin, exists := c.Get("is_admin")
 		if !exists || !isAdmin.(bool) {
+			c.Error(errors.ErrNotAdmin)
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+// UserOnly 仅普通用户可访问
+func UserOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userType := GetUserType(c)
+		if userType != jwt.UserTypeUser {
+			c.Error(errors.ErrForbidden)
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+// AdminTypeOnly 仅管理员类型可访问（包括超管和普通管理员）
+func AdminTypeOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userType := GetUserType(c)
+		if userType != jwt.UserTypeAdmin {
 			c.Error(errors.ErrNotAdmin)
 			c.Abort()
 			return
@@ -223,6 +257,15 @@ func GetIsAdmin(c *gin.Context) bool {
 		return false
 	}
 	return isAdmin.(bool)
+}
+
+// GetUserType 从上下文获取用户类型
+func GetUserType(c *gin.Context) string {
+	userType, exists := c.Get("user_type")
+	if !exists {
+		return ""
+	}
+	return userType.(string)
 }
 
 // AddToWhiteList 添加路由到白名单

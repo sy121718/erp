@@ -18,13 +18,20 @@ var (
 	ErrTokenNotValidYet = errors.New("token尚未生效")
 )
 
+// UserType 常量
+const (
+	UserTypeAdmin = "admin" // 管理员
+	UserTypeUser  = "user"  // 普通用户
+)
+
 // Claims 自定义Claims (access_token使用)
 type Claims struct {
 	UserID   int64  `json:"user_id"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
 	IsAdmin  bool   `json:"is_admin"`
-	TokenID  string `json:"jti"` // Token唯一标识，用于Redis存储
+	UserType string `json:"user_type"` // "admin" 或 "user"
+	TokenID  string `json:"jti"`
 	jwt.RegisteredClaims
 }
 
@@ -33,7 +40,8 @@ type RefreshClaims struct {
 	UserID   int64  `json:"user_id"`
 	Username string `json:"username"`
 	IsAdmin  bool   `json:"is_admin"`
-	TokenID  string `json:"jti"` // Token唯一标识，用于Redis存储
+	UserType string `json:"user_type"`
+	TokenID  string `json:"jti"`
 	jwt.RegisteredClaims
 }
 
@@ -67,7 +75,10 @@ func generateTokenID() string {
 }
 
 // GenerateAccessToken 生成access_token (短期，5分钟)
-func (j *JWT) GenerateAccessToken(userID int64, username, name string, isAdmin bool) (tokenString, tokenID string, err error) {
+func (j *JWT) GenerateAccessToken(userID int64, username, name string, isAdmin bool, userType string) (tokenString, tokenID string, err error) {
+	if userType == "" {
+		userType = UserTypeAdmin
+	}
 	tokenID = generateTokenID()
 	now := time.Now()
 	claims := Claims{
@@ -75,6 +86,7 @@ func (j *JWT) GenerateAccessToken(userID int64, username, name string, isAdmin b
 		Username: username,
 		Name:     name,
 		IsAdmin:  isAdmin,
+		UserType: userType,
 		TokenID:  tokenID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        tokenID,
@@ -91,13 +103,17 @@ func (j *JWT) GenerateAccessToken(userID int64, username, name string, isAdmin b
 }
 
 // GenerateRefreshToken 生成refresh_token (长期，7天)
-func (j *JWT) GenerateRefreshToken(userID int64, username string, isAdmin bool) (tokenString, tokenID string, err error) {
+func (j *JWT) GenerateRefreshToken(userID int64, username string, isAdmin bool, userType string) (tokenString, tokenID string, err error) {
+	if userType == "" {
+		userType = UserTypeAdmin
+	}
 	tokenID = generateTokenID()
 	now := time.Now()
 	claims := RefreshClaims{
 		UserID:   userID,
 		Username: username,
 		IsAdmin:  isAdmin,
+		UserType: userType,
 		TokenID:  tokenID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        tokenID,
@@ -115,7 +131,7 @@ func (j *JWT) GenerateRefreshToken(userID int64, username string, isAdmin bool) 
 
 // GenerateToken 生成token (兼容旧接口)
 func (j *JWT) GenerateToken(userID int64, username, name string, isAdmin bool) (string, error) {
-	tokenString, _, err := j.GenerateAccessToken(userID, username, name, isAdmin)
+	tokenString, _, err := j.GenerateAccessToken(userID, username, name, isAdmin, UserTypeAdmin)
 	return tokenString, err
 }
 
@@ -196,14 +212,17 @@ func (j *JWT) RefreshToken(refreshTokenString string) (accessToken, newRefreshTo
 		return "", "", err
 	}
 
-	// 生成新的access_token
-	accessToken, _, err = j.GenerateAccessToken(claims.UserID, claims.Username, "", claims.IsAdmin)
+	userType := claims.UserType
+	if userType == "" {
+		userType = UserTypeAdmin
+	}
+
+	accessToken, _, err = j.GenerateAccessToken(claims.UserID, claims.Username, "", claims.IsAdmin, userType)
 	if err != nil {
 		return "", "", err
 	}
 
-	// 生成新的refresh_token
-	newRefreshToken, _, err = j.GenerateRefreshToken(claims.UserID, claims.Username, claims.IsAdmin)
+	newRefreshToken, _, err = j.GenerateRefreshToken(claims.UserID, claims.Username, claims.IsAdmin, userType)
 	if err != nil {
 		return "", "", err
 	}
@@ -243,11 +262,16 @@ func (j *JWT) ShouldRefreshToken(claims *Claims) bool {
 func (j *JWT) RefreshAccessToken(claims *Claims) (string, error) {
 	tokenID := generateTokenID()
 	now := time.Now()
+	userType := claims.UserType
+	if userType == "" {
+		userType = UserTypeAdmin
+	}
 	newClaims := Claims{
 		UserID:   claims.UserID,
 		Username: claims.Username,
 		Name:     claims.Name,
 		IsAdmin:  claims.IsAdmin,
+		UserType: userType,
 		TokenID:  tokenID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        tokenID,
